@@ -30,7 +30,7 @@ Menu, Tray, Add, %TEXT_About%, ShowAboutMsg
 Menu, Tray, Add
 Menu, Tray, Add, %TEXT_Exit%, ExitProgram
 
-SetTimer, Reminder, % GetTimerPeriod(true)
+SetTimer, Reminder, % GetTimerPeriod()
 
 Return ; end of the auto-execute section
 
@@ -55,19 +55,15 @@ Reminder:
 if (IsTimeReached()) ; check the time before display the reminder to avoid the accumulated timer precision error https://www.autohotkey.com/docs/commands/SetTimer.htm#Precision
 {
 	ShowReminder()
-	SetTimer, Reminder, % GetTimerPeriod(true)
 }
-else
-{
-	SetTimer, Reminder, % GetTimerPeriod(false)
-}
+SetTimer, Reminder, % GetTimerPeriod()
 Return
 
-; get the period for the next reminder in millisecond, accurate to one millisecond or one second depends on the parameter
-GetTimerPeriod(getAccuratePeriod)
+; get the period for the next reminder in millisecond, accurate to one second
+GetTimerPeriod()
 {
 	global reminderInterval
-	Return getAccuratePeriod ? Mod(3600000 - A_Min * 60000 - A_Sec * 1000 - A_MSec, reminderInterval * 60000) : Mod(3600 - A_Min * 60 - A_Sec, reminderInterval * 60) * 1000
+	Return Mod(3600 - A_Min * 60 - A_Sec, reminderInterval * 60) * 1000
 }
 
 ; check if the current minute is the desired minute
