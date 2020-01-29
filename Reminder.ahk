@@ -13,13 +13,15 @@ ConfigDir := A_AppData . "\" . ScriptName
 ConfigFile := ConfigDir . "\" . ScriptName . ".ini"
 
 TEXT_ReminderText := "The time is now "
-TEXT_Colon := ":"
 TEXT_Period := "."
 TEXT_Settings := "Settings"
 TEXT_Test := "Test"
-TEXT_Try := "Try"
+TEXT_Preview := "Preview"
 TEXT_OK := "OK"
 TEXT_ErrorMsg := "Not a valid command!"
+TEXT_ConfirmMsg := "Confirm before run button action."
+TEXT_RunAction := "Run Action"
+TEXT_RunActionMsg := "You are about to run "
 TEXT_About := "About"
 TEXT_Exit := "Exit"
 TEXT_AboutMsg := ScriptName . " " . ScriptVersion . "`n`n" . CopyrightNotice
@@ -35,6 +37,7 @@ IniRead, Button3, %ConfigFile%, Button, Button3, Relax
 IniRead, Action1, %ConfigFile%, Action, Action1, Notepad.exe
 IniRead, Action2, %ConfigFile%, Action, Action2, https://www.google.com/
 IniRead, Action3, %ConfigFile%, Action, Action3, ::{20d04fe0-3aea-1069-a2d8-08002b30309d}
+IniRead, NeedConfirm, %ConfigFile%, Confirm, NeedConfirm, 0
 
 Menu, Tray, NoStandard ; remove the standard menu items
 Menu, Tray, Tip, %ScriptName% ; change the tray icon's tooltip
@@ -64,11 +67,12 @@ else ; else display the settings GUI
 	Gui, New, +HwndGuiHwnd, %TEXT_Settings%
 	Gui, %GuiHwnd%:Default
 
-	Gui, Add, GroupBox, Section w795 h180, %TEXT_Settings%
+	Gui, Add, GroupBox, Section w795 h215, %TEXT_Settings%
 	Gui, Add, Text, Section xp+10 yp+20, Number of button(s)
 
 	;Gui, Add, Text, Section, Number of button(s)
-	Gui, Add, DropDownList, vNumButton gSettings Choose%NumButton% w75, 1|2|3
+	Position := NumButton + 1
+	Gui, Add, DropDownList, vNumButton gSettings Choose%Position% w75, 0|1|2|3
 
 	Gui, Add, Text, Section ys, Button1 Text
 	Gui, Add, Edit, vButton1 gSettings r1 w75 Limit, %Button1%
@@ -98,10 +102,14 @@ else ; else display the settings GUI
 	Gui, Add, Button, vTest3 gAction3 w75, %TEXT_Test%
 
 	Gui, Add, Text
-	Gui, Add, Button, Section xm vTry gShowReminder w75 h23, %TEXT_Try%
+	Gui, Add, Checkbox, xs Checked%NeedConfirm% vNeedConfirm gSettings, %TEXT_ConfirmMsg%
+
+	Gui, Add, Text
+	Gui, Add, Button, Section xm vPreview gShowReminder w75 h23, %TEXT_Preview%
 	Gui, Add, Button, vOK gOK ys w75 h23, %TEXT_OK%
 	GuiControl, +Default, OK
 	GuiControl, Focus, OK
+	Gosub, DisableGUI
 	Gui, Show
 }
 Return
@@ -147,14 +155,17 @@ Gui, Submit, NoHide
 if (NumButton == 1)
 {
 	MsgBoxOption := 0
+	Gosub, DisableGUI
 }
 else if (NumButton == 2)
 {
-	MsgBoxOption := 257 ; 1 + 256
+	MsgBoxOption := 1 ; OK/Cancel
+	Gosub, DisableGUI
 }
 else
 {
-	MsgBoxOption := 515 ; 3 + 512
+	MsgBoxOption := 3 ; Yes/No/Cancel
+	Gosub, DisableGUI
 }
 Gosub, EnsureConfigDirExists
 IniWrite, %MsgBoxOption%, %ConfigFile%, General, MsgBoxOption
@@ -165,6 +176,7 @@ IniWrite, %Button3%, %ConfigFile%, Button, Button3
 IniWrite, %Action1%, %ConfigFile%, Action, Action1
 IniWrite, %Action2%, %ConfigFile%, Action, Action2
 IniWrite, %Action3%, %ConfigFile%, Action, Action3
+IniWrite, %NeedConfirm%, %ConfigFile%, Confirm, NeedConfirm
 Return
 
 OK:
@@ -190,6 +202,61 @@ Return
 ExitProgram:
 ExitApp
 
+DisableGUI:
+if (NumButton == 0)
+{
+	GuiControl, Disable, Button1
+	GuiControl, Disable, Action1
+	GuiControl, Disable, Test1
+	GuiControl, Disable, Button2
+	GuiControl, Disable, Action2
+	GuiControl, Disable, Test2
+	GuiControl, Disable, Button3
+	GuiControl, Disable, Action3
+	GuiControl, Disable, Test3
+	GuiControl, Disable, NeedConfirm
+}
+else if (NumButton == 1)
+{
+	GuiControl, Enable, Button1
+	GuiControl, Enable, Action1
+	GuiControl, Enable, Test1
+	GuiControl, Disable, Button2
+	GuiControl, Disable, Action2
+	GuiControl, Disable, Test2
+	GuiControl, Disable, Button3
+	GuiControl, Disable, Action3
+	GuiControl, Disable, Test3
+	GuiControl, Enable, NeedConfirm
+}
+else if (NumButton == 2)
+{
+	GuiControl, Enable, Button1
+	GuiControl, Enable, Action1
+	GuiControl, Enable, Test1
+	GuiControl, Enable, Button2
+	GuiControl, Enable, Action2
+	GuiControl, Enable, Test2
+	GuiControl, Disable, Button3
+	GuiControl, Disable, Action3
+	GuiControl, Disable, Test3
+	GuiControl, Enable, NeedConfirm
+}
+else
+{
+	GuiControl, Enable, Button1
+	GuiControl, Enable, Action1
+	GuiControl, Enable, Test1
+	GuiControl, Enable, Button2
+	GuiControl, Enable, Action2
+	GuiControl, Enable, Test2
+	GuiControl, Enable, Button3
+	GuiControl, Enable, Action3
+	GuiControl, Enable, Test3
+	GuiControl, Enable, NeedConfirm
+}
+Return
+
 ; ensure ConfigDir exists
 EnsureConfigDirExists:
 if !InStr(FileExist(ConfigDir), "D")
@@ -205,7 +272,7 @@ Return
 Reminder:
 if (IsTimeReached()) ; check the time before display the reminder to avoid the accumulated timer precision error https://www.autohotkey.com/docs/commands/SetTimer.htm#Precision
 {
-	ShowReminder()
+	Gosub, ShowReminder
 }
 SetTimer, Reminder, % GetTimerPeriod()
 Return
@@ -240,43 +307,160 @@ IsTimeReached()
 	Return Mod(60 - A_Min, ReminderInterval) == 0
 }
 
-ShowReminder()
+HideTrayTip()
 {
-	global
-	OnMessage(0x44, "WM_COMMNOTIFY") ; https://autohotkey.com/board/topic/56272-msgbox-button-label-change/?p=353457
-	MsgBox, % MsgBoxOption, %ScriptName%, % TEXT_ReminderText . A_Hour . TEXT_Colon . A_Min . TEXT_Period, % MsgBoxTimeout
-	if (NumButton == 1) ; MsgBoxOption = 0: OK
+	TrayTip ; attempt to hide the TrayTip in the normal way
+	if (SubStr(A_OSVersion, 1, 3) == "10.") ; if the OS version is Windows 10
 	{
-		IfMsgBox, OK
-		{
-			Gosub Action1
-		}
-	}
-	else if (NumButton == 2) ; MsgBoxOption = 1 + 256: OK/Cancel
-	{
-		IfMsgBox, OK
-		{
-			Gosub Action1
-		}
-		IfMsgBox, Cancel
-		{
-			Gosub, Action2
-		}
-	}
-	else ; MsgBoxOption = 3 + 512: Yes/No/Cancel
-	{
-		IfMsgBox, Yes
-		{
-			Gosub Action1
-		}
-		IfMsgBox, No
-		{
-			Gosub, Action2
-		}
-		IfMsgBox, Cancel
-		{
-			Gosub, Action3
-		}
+		; temporarily removing the tray icon to hide the TrayTip
+		Menu, Tray, NoIcon
+		Sleep, 100
+		Menu, Tray, Icon
 	}
 }
 
+ShowReminder:
+Process, Exist
+DetectHiddenWindows, On
+if WinExist(ScriptName . " ahk_class #32770 ahk_pid " . ErrorLevel) ; if the about message already exists
+{
+	WinShow ; show the message window if it is hidden
+	WinActivate
+}
+else ; else display the about message
+{
+	if (NumButton == 0)
+	{
+		TrayTip, %ScriptName%, % TEXT_ReminderText . A_Hour . ":" . A_Min . TEXT_Period
+		SetTimer, HideTrayTip, -60000
+	}
+	else
+	{
+		OnMessage(0x44, "WM_COMMNOTIFY") ; https://autohotkey.com/board/topic/56272-msgbox-button-label-change/?p=353457
+		MsgBox, % MsgBoxOption, %ScriptName%, % TEXT_ReminderText . A_Hour . ":" . A_Min . TEXT_Period, % MsgBoxTimeout
+		if (NumButton == 1) ; MsgBoxOption = 0: OK
+		{
+			IfMsgBox, OK
+			{
+				if (NeedConfirm && Action1 != "")
+				{
+					MsgBox, 1, %TEXT_RunAction%, % TEXT_RunActionMsg . Action1 . TEXT_Period
+					IfMsgBox, OK
+					{
+						Gosub Action1
+					}
+					IfMsgBox, Cancel
+					{
+						Return
+					}
+				}
+				else
+				{
+					Gosub Action1
+				}
+			}
+		}
+		else if (NumButton == 2) ; MsgBoxOption = 1: OK/Cancel
+		{
+			IfMsgBox, OK
+			{
+				if (NeedConfirm && Action1 != "")
+				{
+					MsgBox, 1, %TEXT_RunAction%, % TEXT_RunActionMsg . Action1 . TEXT_Period
+					IfMsgBox, OK
+					{
+						Gosub Action1
+					}
+					IfMsgBox, Cancel
+					{
+						Return
+					}
+				}
+				else
+				{
+					Gosub Action1
+				}
+			}
+			IfMsgBox, Cancel
+			{
+				if (NeedConfirm && Action2 != "")
+				{
+					MsgBox, 1, %TEXT_RunAction%, % TEXT_RunActionMsg . Action2 . TEXT_Period
+					IfMsgBox, OK
+					{
+						Gosub Action2
+					}
+					IfMsgBox, Cancel
+					{
+						Return
+					}
+				}
+				else
+				{
+					Gosub Action2
+				}
+			}
+		}
+		else ; MsgBoxOption = 3: Yes/No/Cancel
+		{
+			IfMsgBox, Yes
+			{
+				if (NeedConfirm && Action1 != "")
+				{
+					MsgBox, 1, %TEXT_RunAction%, % TEXT_RunActionMsg . Action1 . TEXT_Period
+					IfMsgBox, OK
+					{
+						Gosub Action1
+					}
+					IfMsgBox, Cancel
+					{
+						Return
+					}
+				}
+				else
+				{
+					Gosub Action1
+				}
+			}
+			IfMsgBox, No
+			{
+				if (NeedConfirm && Action2 != "")
+				{
+					MsgBox, 1, %TEXT_RunAction%, % TEXT_RunActionMsg . Action2 . TEXT_Period
+					IfMsgBox, OK
+					{
+						Gosub Action2
+					}
+					IfMsgBox, Cancel
+					{
+						Return
+					}
+				}
+				else
+				{
+					Gosub Action2
+				}
+			}
+			IfMsgBox, Cancel
+			{
+				if (NeedConfirm && Action3 != "")
+				{
+					MsgBox, 1, %TEXT_RunAction%, % TEXT_RunActionMsg . Action3 . TEXT_Period
+					IfMsgBox, OK
+					{
+						Gosub Action3
+					}
+					IfMsgBox, Cancel
+					{
+						Return
+					}
+				}
+				else
+				{
+					Gosub Action3
+				}
+			}
+		}
+	}
+}
+Return
