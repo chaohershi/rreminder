@@ -13,7 +13,7 @@ ConfigDir := A_AppData . "\" . ScriptName
 ConfigFile := ConfigDir . "\" . ScriptName . ".ini"
 
 TEXT_Reminder := "Reminder"
-TEXT_ReminderText := "The time is now "
+TEXT_ReminderText := "The time now is "
 TEXT_Period := "."
 TEXT_Settings := "Settings"
 TEXT_Style := "Reminder Style"
