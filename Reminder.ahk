@@ -15,6 +15,7 @@ ConfigFile := ConfigDir . "\" . ScriptName . ".ini"
 TEXT_ReminderText := "The time is now "
 TEXT_Period := "."
 TEXT_Settings := "Settings"
+TEXT_Style := "Reminder Style"
 TEXT_Test := "Test"
 TEXT_Preview := "Preview"
 TEXT_OK := "OK"
@@ -67,7 +68,7 @@ else ; else display the settings GUI
 	Gui, New, +HwndGuiHwnd, %TEXT_Settings%
 	Gui, %GuiHwnd%:Default
 
-	Gui, Add, GroupBox, Section w795 h215, %TEXT_Settings%
+	Gui, Add, GroupBox, Section w795 h215, %TEXT_Style%
 	Gui, Add, Text, Section xp+10 yp+20, Number of button(s)
 
 	Position := NumButton + 1
