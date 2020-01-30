@@ -16,7 +16,7 @@ Customizable button texts and actions:
 ![Reminder](img/Reminder%203%20Buttons.png)
 
 ## Help ##
-For the button actions, you can run a document, URL, executable file (.exe, .com, .bat, etc.), shortcut (.lnk). Some advanced examples can be found [here](https://www.autohotkey.com/docs/commands/Run.htm#ExBasic).
+For the button actions, you can run a document, URL, executable file (.exe, .com, .bat, etc.), shortcut (.lnk), or you can leave it blank. Some advanced examples can be found [here](https://www.autohotkey.com/docs/commands/Run.htm#ExBasic).
 
 ## Download ##
 You can download the compiled standalone executable `RReminder.exe` [here](https://github.com/chaohershi/rreminder/releases). No installation required.
