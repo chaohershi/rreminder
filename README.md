@@ -18,6 +18,8 @@ Customizable button texts and actions:
 ## Help ##
 For the button actions, you can run a document, URL, executable file (.exe, .com, .bat, etc.), shortcut (.lnk), or you can leave it blank. Some advanced examples can be found [here](https://www.autohotkey.com/docs/commands/Run.htm#ExBasic).
 
+Clicking the close button has the same effect as clicking the right most button.
+
 If you let the time run, after 1 minute, the pop-up window/notification will be dismissed automatically, and no action will be triggered.
 
 ## Download ##
