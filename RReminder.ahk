@@ -5,13 +5,14 @@
 SendMode Input ; recommended for new scripts due to its superior speed and reliability
 SetWorkingDir %A_ScriptDir% ; ensures a consistent starting directory
 
-ScriptName := "Reminder"
+ScriptName := "RReminder"
 ScriptVersion := "1.2.0.0"
 CopyrightNotice := "Copyright (c) 2020 Chaohe Shi"
 
 ConfigDir := A_AppData . "\" . ScriptName
 ConfigFile := ConfigDir . "\" . ScriptName . ".ini"
 
+TEXT_Reminder := "Reminder"
 TEXT_ReminderText := "The time is now "
 TEXT_Period := "."
 TEXT_Settings := "Settings"
@@ -38,12 +39,12 @@ IniRead, Button3, %ConfigFile%, Button, Button3, Relax
 IniRead, Action1, %ConfigFile%, Action, Action1, Notepad.exe
 IniRead, Action2, %ConfigFile%, Action, Action2, https://www.google.com/
 IniRead, Action3, %ConfigFile%, Action, Action3, ::{20d04fe0-3aea-1069-a2d8-08002b30309d}
-IniRead, NeedConfirm, %ConfigFile%, Confirm, NeedConfirm, 0
+IniRead, NeedConfirm, %ConfigFile%, Confirm, NeedConfirm, 1
 
 Menu, Tray, NoStandard ; remove the standard menu items
 Menu, Tray, Tip, %ScriptName% ; change the tray icon's tooltip
-Menu, Tray, Add, %ScriptName%, ShowReminder
-Menu, Tray, Default, %ScriptName%
+Menu, Tray, Add, %TEXT_Reminder%, ShowReminder
+Menu, Tray, Default, %TEXT_Reminder%
 Menu, Tray, Add
 Menu, Tray, Add, %TEXT_Settings%, ShowSettingsGUI
 Menu, Tray, Add
@@ -109,7 +110,7 @@ else ; else display the settings GUI
 	Gui, Add, Button, vOK gOK ys w75 h23, %TEXT_OK%
 	GuiControl, +Default, OK
 	GuiControl, Focus, OK
-	Gosub, DisableGUI
+	Gosub, UpdateGUI
 	Gui, Show
 }
 Return
@@ -155,17 +156,17 @@ Gui, Submit, NoHide
 if (NumButton == 1)
 {
 	MsgBoxOption := 0
-	Gosub, DisableGUI
+	Gosub, UpdateGUI
 }
 else if (NumButton == 2)
 {
 	MsgBoxOption := 1 ; OK/Cancel
-	Gosub, DisableGUI
+	Gosub, UpdateGUI
 }
 else
 {
 	MsgBoxOption := 3 ; Yes/No/Cancel
-	Gosub, DisableGUI
+	Gosub, UpdateGUI
 }
 Gosub, EnsureConfigDirExists
 IniWrite, %MsgBoxOption%, %ConfigFile%, General, MsgBoxOption
@@ -195,14 +196,14 @@ if WinExist(TEXT_About . " ahk_class #32770 ahk_pid " . ErrorLevel) ; if the abo
 }
 else ; else display the about message
 {
-	MsgBox, 1, %TEXT_About%, %TEXT_AboutMsg%
+	MsgBox, 0, %TEXT_About%, %TEXT_AboutMsg%
 }
 Return
 
 ExitProgram:
 ExitApp
 
-DisableGUI:
+UpdateGUI:
 if (NumButton == 0)
 {
 	GuiControl, Disable, Button1
@@ -284,7 +285,7 @@ WM_COMMNOTIFY(wParam)
 	{
 		Process, Exist
 		DetectHiddenWindows, On
-		if WinExist(ScriptName . " ahk_class #32770 ahk_pid " . ErrorLevel)
+		if WinExist(TEXT_Reminder . " ahk_class #32770 ahk_pid " . ErrorLevel)
 		{
 			ControlSetText, Button1, &%Button1%
 			ControlSetText, Button2, &%Button2%
@@ -322,7 +323,7 @@ HideTrayTip()
 ShowReminder:
 Process, Exist
 DetectHiddenWindows, On
-if WinExist(ScriptName . " ahk_class #32770 ahk_pid " . ErrorLevel) ; if the about message already exists
+if WinExist(TEXT_Reminder . " ahk_class #32770 ahk_pid " . ErrorLevel) ; if the about message already exists
 {
 	WinShow ; show the message window if it is hidden
 	WinActivate
@@ -331,13 +332,13 @@ else ; else display the about message
 {
 	if (NumButton == 0)
 	{
-		TrayTip, %ScriptName%, % TEXT_ReminderText . A_Hour . ":" . A_Min . TEXT_Period
+		TrayTip, %TEXT_Reminder%, % TEXT_ReminderText . A_Hour . ":" . A_Min . TEXT_Period
 		SetTimer, HideTrayTip, -60000
 	}
 	else
 	{
 		OnMessage(0x44, "WM_COMMNOTIFY") ; https://autohotkey.com/board/topic/56272-msgbox-button-label-change/?p=353457
-		MsgBox, % MsgBoxOption, %ScriptName%, % TEXT_ReminderText . A_Hour . ":" . A_Min . TEXT_Period, % MsgBoxTimeout
+		MsgBox, % MsgBoxOption, %TEXT_Reminder%, % TEXT_ReminderText . A_Hour . ":" . A_Min . TEXT_Period, % MsgBoxTimeout
 		if (NumButton == 1) ; MsgBoxOption = 0: OK
 		{
 			IfMsgBox, OK
