@@ -1,1 +1,7 @@
+title: RReminder
+description: Reminds you time every whole and half hour.
+show_downloads: true
+google_analytics: UA-105337133-5
 theme: jekyll-theme-slate
+plugins:
+  - jekyll-sitemap
