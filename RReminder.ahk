@@ -323,12 +323,12 @@ HideTrayTip()
 ShowReminder:
 Process, Exist
 DetectHiddenWindows, On
-if WinExist(TEXT_Reminder . " ahk_class #32770 ahk_pid " . ErrorLevel) ; if the about message already exists
+if WinExist(TEXT_Reminder . " ahk_class #32770 ahk_pid " . ErrorLevel) ; if the message already exists
 {
 	WinShow ; show the message window if it is hidden
 	WinActivate
 }
-else ; else display the about message
+else ; else display the message
 {
 	if (NumButton == 0)
 	{
