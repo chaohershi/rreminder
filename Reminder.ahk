@@ -6,7 +6,7 @@ SendMode Input ; recommended for new scripts due to its superior speed and relia
 SetWorkingDir %A_ScriptDir% ; ensures a consistent starting directory
 
 ScriptName := "Reminder"
-ScriptVersion := "1.1.0.0"
+ScriptVersion := "1.2.0.0"
 CopyrightNotice := "Copyright (c) 2020 Chaohe Shi"
 
 ConfigDir := A_AppData . "\" . ScriptName
@@ -19,7 +19,7 @@ TEXT_Test := "Test"
 TEXT_Preview := "Preview"
 TEXT_OK := "OK"
 TEXT_ErrorMsg := "Not a valid command!"
-TEXT_ConfirmMsg := "Confirm before run button action."
+TEXT_ConfirmMsg := "Confirm before run button action"
 TEXT_RunAction := "Run Action"
 TEXT_RunActionMsg := "You are about to run "
 TEXT_About := "About"
@@ -70,7 +70,6 @@ else ; else display the settings GUI
 	Gui, Add, GroupBox, Section w795 h215, %TEXT_Settings%
 	Gui, Add, Text, Section xp+10 yp+20, Number of button(s)
 
-	;Gui, Add, Text, Section, Number of button(s)
 	Position := NumButton + 1
 	Gui, Add, DropDownList, vNumButton gSettings Choose%Position% w75, 0|1|2|3
 
