@@ -6,16 +6,18 @@ SendMode Input ; recommended for new scripts due to its superior speed and relia
 SetWorkingDir %A_ScriptDir% ; ensures a consistent starting directory
 
 ScriptName := "RReminder"
-ScriptVersion := "1.2.0.0"
+ScriptVersion := "1.3.0.0"
 CopyrightNotice := "Copyright (c) 2020 Chaohe Shi"
 
 ConfigDir := A_AppData . "\" . ScriptName
 ConfigFile := ConfigDir . "\" . ScriptName . ".ini"
+ReminderTextFile := ConfigDir . "\" . ScriptName . ".txt"
 
 TEXT_Reminder := "Reminder"
 TEXT_ReminderText := "The time now is "
 TEXT_Period := "."
 TEXT_Settings := "Settings"
+TEXT_TEXT := "Reminder Text"
 TEXT_Style := "Reminder Style"
 TEXT_Test := "Test"
 TEXT_Preview := "Preview"
@@ -31,6 +33,7 @@ TEXT_AboutMsg := ScriptName . " " . ScriptVersion . "`n`n" . CopyrightNotice
 ReminderInterval := 30 ; this number needs to be one of the factors of 60min. e.g. when reminderInterval is 15, reminder occurs at 0, 15, 30, 45min of every hour
 MsgBoxTimeout := 60
 
+FileRead, ReminderText, %ReminderTextFile%
 IniRead, MsgBoxOption, %ConfigFile%, General, MsgBoxOption, 0 ; use 0, 1, or 3 to for 1, 2, or 3 buttons and enable the close button
 IniRead, NumButton, %ConfigFile%, General, NumButton, 1
 IniRead, Button1, %ConfigFile%, Button, Button1, OK
@@ -41,7 +44,7 @@ IniRead, Action2, %ConfigFile%, Action, Action2, https://www.google.com/
 IniRead, Action3, %ConfigFile%, Action, Action3, ::{20d04fe0-3aea-1069-a2d8-08002b30309d}
 IniRead, NeedConfirm, %ConfigFile%, Confirm, NeedConfirm, 1
 
-Menu, Tray, NoStandard ; remove the standard menu items
+;Menu, Tray, NoStandard ; remove the standard menu items
 Menu, Tray, Tip, %ScriptName% ; change the tray icon's tooltip
 Menu, Tray, Add, %TEXT_Reminder%, ShowReminder
 Menu, Tray, Default, %TEXT_Reminder%
@@ -69,8 +72,13 @@ else ; else display the settings GUI
 	Gui, New, +HwndGuiHwnd, %TEXT_Settings%
 	Gui, %GuiHwnd%:Default
 
-	Gui, Add, GroupBox, Section w795 h215, %TEXT_Style%
-	Gui, Add, Text, Section xp+10 yp+20, Number of button(s)
+	Gui, Add, Tab3, , %TEXT_TEXT%|%TEXT_Style%
+
+	Gui, Tab, 1
+	Gui, Add, Edit, vReminderText gSettings r14 w574, %ReminderText%
+
+	Gui, Tab, 2
+	Gui, Add, Text, Section, Number of button(s)
 
 	Position := NumButton + 1
 	Gui, Add, DropDownList, vNumButton gSettings Choose%Position% w75, 0|1|2|3
@@ -79,7 +87,7 @@ else ; else display the settings GUI
 	Gui, Add, Edit, vButton1 gSettings r1 w75 Limit, %Button1%
 
 	Gui, Add, Text, ys, Button1 Action
-	Gui, Add, Edit, vAction1 gSettings r1 w500, %Action1%
+	Gui, Add, Edit, vAction1 gSettings r1 w300, %Action1%
 
 	Gui, Add, Text, ys
 	Gui, Add, Button, vTest1 gAction1 w75, %TEXT_Test%
@@ -88,7 +96,7 @@ else ; else display the settings GUI
 	Gui, Add, Edit, vButton2 gSettings r1 w75 Limit, %Button2%
 
 	Gui, Add, Text, ys, Button2 Action
-	Gui, Add, Edit, vAction2 gSettings r1 w500, %Action2%
+	Gui, Add, Edit, vAction2 gSettings r1 w300, %Action2%
 
 	Gui, Add, Text, ys
 	Gui, Add, Button, vTest2 gAction2 w75, %TEXT_Test%
@@ -97,7 +105,7 @@ else ; else display the settings GUI
 	Gui, Add, Edit, vButton3 gSettings r1 w75 Limit, %Button3%
 
 	Gui, Add, Text, ys, Button3 Action
-	Gui, Add, Edit, vAction3 gSettings r1 w500, %Action3%
+	Gui, Add, Edit, vAction3 gSettings r1 w300, %Action3%
 
 	Gui, Add, Text, ys
 	Gui, Add, Button, vTest3 gAction3 w75, %TEXT_Test%
@@ -105,7 +113,7 @@ else ; else display the settings GUI
 	Gui, Add, Text
 	Gui, Add, Checkbox, xs Checked%NeedConfirm% vNeedConfirm gSettings, %TEXT_ConfirmMsg%
 
-	Gui, Add, Text
+	Gui, Tab
 	Gui, Add, Button, Section xm vPreview gShowReminder w75 h23, %TEXT_Preview%
 	Gui, Add, Button, vOK gOK ys w75 h23, %TEXT_OK%
 	GuiControl, +Default, OK
@@ -169,6 +177,8 @@ else
 	Gosub, UpdateGUI
 }
 Gosub, EnsureConfigDirExists
+FileDelete, %ReminderTextFile%
+FileAppend, %ReminderText%, %ReminderTextFile%
 IniWrite, %MsgBoxOption%, %ConfigFile%, General, MsgBoxOption
 IniWrite, %NumButton%, %ConfigFile%, General, NumButton
 IniWrite, %Button1%, %ConfigFile%, Button, Button1
@@ -183,6 +193,7 @@ Return
 OK:
 GuiClose:
 GuiEscape:
+Gui, Submit, NoHide
 Gui, Destroy
 Return
 
@@ -338,7 +349,7 @@ else ; else display the message
 	else
 	{
 		OnMessage(0x44, "WM_COMMNOTIFY") ; https://autohotkey.com/board/topic/56272-msgbox-button-label-change/?p=353457
-		MsgBox, % MsgBoxOption, %TEXT_Reminder%, % TEXT_ReminderText . A_Hour . ":" . A_Min . TEXT_Period, % MsgBoxTimeout
+		MsgBox, % MsgBoxOption, %TEXT_Reminder%, % TEXT_ReminderText . A_Hour . ":" . A_Min . TEXT_Period . ((ReminderText == "") ? "" : "`n`n" . ReminderText), % MsgBoxTimeout
 		if (NumButton == 1) ; MsgBoxOption = 0: OK
 		{
 			IfMsgBox, OK
