@@ -7,7 +7,7 @@ SetWorkingDir %A_ScriptDir% ; ensure a consistent starting directory
 FileEncoding, UTF-8 ; set the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen
 
 ScriptName := "RReminder"
-ScriptVersion := "1.3.0.0"
+ScriptVersion := "1.3.1.0"
 CopyrightNotice := "Copyright (c) 2020 Chaohe Shi"
 
 ConfigDir := A_AppData . "\" . ScriptName
@@ -166,8 +166,6 @@ Gui, Submit, NoHide
 Gosub, UpdateMsgBoxOption
 Gosub, UpdateGUI
 Gosub, EnsureConfigDirExists
-FileDelete, %ReminderTextFile%
-FileAppend, %ReminderText%, %ReminderTextFile%
 IniWrite, %NumButton%, %ConfigFile%, General, NumButton
 IniWrite, %Button1%, %ConfigFile%, Button, Button1
 IniWrite, %Button2%, %ConfigFile%, Button, Button2
@@ -181,6 +179,8 @@ Return
 OK:
 GuiClose:
 GuiEscape:
+FileDelete, %ReminderTextFile%
+FileAppend, %ReminderText%, %ReminderTextFile%
 Gui, Submit, NoHide
 Gui, Destroy
 Return
