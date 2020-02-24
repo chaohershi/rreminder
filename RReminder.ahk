@@ -3,7 +3,7 @@
 #SingleInstance force ; allow only one instance of this script to be running
 #Warn ; enable warnings to assist with detecting common errors
 SendMode Input ; recommended for new scripts due to its superior speed and reliability
-SetWorkingDir %A_ScriptDir% ; ensures a consistent starting directory
+SetWorkingDir %A_ScriptDir% ; ensure a consistent starting directory
 
 ScriptName := "RReminder"
 ScriptVersion := "1.3.0.0"
@@ -32,9 +32,9 @@ TEXT_AboutMsg := ScriptName . " " . ScriptVersion . "`n`n" . CopyrightNotice
 
 ReminderInterval := 30 ; this number needs to be one of the factors of 60min. e.g. when reminderInterval is 15, reminder occurs at 0, 15, 30, 45min of every hour
 MsgBoxTimeout := 60
+MsgBoxOption := 0 ; use 0, 1, or 3 to for 1, 2, or 3 buttons and enable the close button
 
 FileRead, ReminderText, %ReminderTextFile%
-IniRead, MsgBoxOption, %ConfigFile%, General, MsgBoxOption, 0 ; use 0, 1, or 3 to for 1, 2, or 3 buttons and enable the close button
 IniRead, NumButton, %ConfigFile%, General, NumButton, 1
 IniRead, Button1, %ConfigFile%, Button, Button1, OK
 IniRead, Button2, %ConfigFile%, Button, Button2, Work
@@ -43,6 +43,7 @@ IniRead, Action1, %ConfigFile%, Action, Action1, Notepad.exe
 IniRead, Action2, %ConfigFile%, Action, Action2, https://www.google.com/
 IniRead, Action3, %ConfigFile%, Action, Action3, ::{20d04fe0-3aea-1069-a2d8-08002b30309d}
 IniRead, NeedConfirm, %ConfigFile%, Confirm, NeedConfirm, 1
+Gosub, UpdateMsgBoxOption
 
 ;Menu, Tray, NoStandard ; remove the standard menu items
 Menu, Tray, Tip, %ScriptName% ; change the tray icon's tooltip
@@ -161,25 +162,11 @@ Return
 
 Settings:
 Gui, Submit, NoHide
-if (NumButton == 1)
-{
-	MsgBoxOption := 0
-	Gosub, UpdateGUI
-}
-else if (NumButton == 2)
-{
-	MsgBoxOption := 1 ; OK/Cancel
-	Gosub, UpdateGUI
-}
-else
-{
-	MsgBoxOption := 3 ; Yes/No/Cancel
-	Gosub, UpdateGUI
-}
+Gosub, UpdateMsgBoxOption
+Gosub, UpdateGUI
 Gosub, EnsureConfigDirExists
 FileDelete, %ReminderTextFile%
 FileAppend, %ReminderText%, %ReminderTextFile%
-IniWrite, %MsgBoxOption%, %ConfigFile%, General, MsgBoxOption
 IniWrite, %NumButton%, %ConfigFile%, General, NumButton
 IniWrite, %Button1%, %ConfigFile%, Button, Button1
 IniWrite, %Button2%, %ConfigFile%, Button, Button2
@@ -213,6 +200,21 @@ Return
 
 ExitProgram:
 ExitApp
+
+UpdateMsgBoxOption:
+if (NumButton == 1)
+{
+	MsgBoxOption := 0 ; OK
+}
+else if (NumButton == 2)
+{
+	MsgBoxOption := 1 ; OK/Cancel
+}
+else
+{
+	MsgBoxOption := 3 ; Yes/No/Cancel
+}
+Return
 
 UpdateGUI:
 if (NumButton == 0)
