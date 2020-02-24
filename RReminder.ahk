@@ -4,6 +4,7 @@
 #Warn ; enable warnings to assist with detecting common errors
 SendMode Input ; recommended for new scripts due to its superior speed and reliability
 SetWorkingDir %A_ScriptDir% ; ensure a consistent starting directory
+FileEncoding, UTF-8 ; set the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen
 
 ScriptName := "RReminder"
 ScriptVersion := "1.3.0.0"
