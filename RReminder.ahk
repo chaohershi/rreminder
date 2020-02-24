@@ -1,7 +1,6 @@
 ﻿#NoEnv ; recommended for performance and compatibility with future AutoHotkey releases
 #Persistent ; keep the script permanently running
 #SingleInstance force ; allow only one instance of this script to be running
-#Warn ; enable warnings to assist with detecting common errors
 SendMode Input ; recommended for new scripts due to its superior speed and reliability
 SetWorkingDir %A_ScriptDir% ; ensure a consistent starting directory
 FileEncoding, UTF-8 ; set the default encoding for FileRead, FileReadLine, Loop Read, FileAppend, and FileOpen
@@ -46,7 +45,7 @@ IniRead, Action3, %ConfigFile%, Action, Action3, ::{20d04fe0-3aea-1069-a2d8-0800
 IniRead, NeedConfirm, %ConfigFile%, Confirm, NeedConfirm, 1
 Gosub, UpdateMsgBoxOption
 
-;Menu, Tray, NoStandard ; remove the standard menu items
+Menu, Tray, NoStandard ; remove the standard menu items
 Menu, Tray, Tip, %ScriptName% ; change the tray icon's tooltip
 Menu, Tray, Add, %TEXT_Reminder%, ShowReminder
 Menu, Tray, Default, %TEXT_Reminder%
