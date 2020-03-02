@@ -58,6 +58,12 @@ Menu, Tray, Add, %TEXT_Exit%, ExitProgram
 
 SetTimer, Reminder, % GetTimerPeriod()
 
+; if run the script with parameter "Settings", show settings menu
+if (A_Args[1] == TEXT_Settings)
+{
+	Gosub, ShowSettingsGUI
+}
+
 Return ; end of the auto-execute section
 
 ShowSettingsGUI:
