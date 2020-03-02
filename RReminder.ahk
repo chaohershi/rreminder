@@ -121,8 +121,8 @@ else ; else display the settings GUI
 	Gui, Add, Checkbox, xs Checked%NeedConfirm% vNeedConfirm gSettings, %TEXT_ConfirmMsg%
 
 	Gui, Tab
-	Gui, Add, Button, Section xm vPreview gShowReminder w75 h23, %TEXT_Preview%
-	Gui, Add, Button, vOK gOK ys w75 h23, %TEXT_OK%
+	Gui, Add, Button, Section xm vPreview gShowReminder w75 h23, &%TEXT_Preview%
+	Gui, Add, Button, vOK gOK ys w75 h23, &%TEXT_OK%
 	GuiControl, +Default, OK
 	GuiControl, Focus, OK
 	Gosub, UpdateGUI
